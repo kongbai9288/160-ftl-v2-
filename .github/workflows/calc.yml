@@ -1,0 +1,73 @@
+name: 珍珠炮炮码计算
+
+on:
+  workflow_dispatch:
+    inputs:
+      dest_x:
+        description: '目标 X 坐标'
+        required: true
+        type: number
+        default: 1234
+      dest_z:
+        description: '目标 Z 坐标'
+        required: true
+        type: number
+        default: 4321
+      base_tick:
+        description: '基准时刻 tick（例如 72）'
+        required: true
+        type: number
+        default: 72
+      base_pos_x:
+        description: '基准 X 坐标'
+        required: true
+        type: number
+        default: 2.0
+      base_pos_y:
+        description: '基准 Y 坐标'
+        required: true
+        type: number
+        default: 169.630464
+      base_pos_z:
+        description: '基准 Z 坐标'
+        required: true
+        type: number
+        default: 28.0
+      base_motion_x:
+        description: '基准 X 速度（通常为0）'
+        required: true
+        type: number
+        default: 0.0
+      base_motion_y:
+        description: '基准 Y 速度'
+        required: true
+        type: number
+        default: -0.003727
+      base_motion_z:
+        description: '基准 Z 速度（通常为0）'
+        required: true
+        type: number
+        default: 0.0
+      ground_height:
+        description: '地面高度（下界128，主世界0）'
+        required: false
+        type: number
+        default: 128
+
+jobs:
+  calculate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: 运行炮码计算
+        run: |
+          python pearl_cannon_calc.py \
+            --dest-x ${{ github.event.inputs.dest_x }} \
+            --dest-z ${{ github.event.inputs.dest_z }} \
+            --base-tick ${{ github.event.inputs.base_tick }} \
+            --base-pos ${{ github.event.inputs.base_pos_x }} ${{ github.event.inputs.base_pos_y }} ${{ github.event.inputs.base_pos_z }} \
+            --base-motion ${{ github.event.inputs.base_motion_x }} ${{ github.event.inputs.base_motion_y }} ${{ github.event.inputs.base_motion_z }} \
+            --ground-height ${{ github.event.inputs.ground_height }}
