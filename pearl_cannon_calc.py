@@ -2,13 +2,7 @@ import struct
 import argparse
 import sys
 
-# 物理常量（不要改）
-G = 0.03
-F = float32_to_float64(0.99)
-ONE_TNT_MOTION_XZ = 0.6026793588895138
-ONE_TNT_MOTION_Y = 0.004435058914919521
-DIRECTIONS_MAPPING = {'N': '00', 'W': '01', 'E': '10', 'S': '11'}
-
+# ========== 函数定义在最前面 ==========
 def float32_to_float64(val):
     packed = struct.pack('!f', val)
     unpacked = struct.unpack('!f', packed)[0]
@@ -26,6 +20,13 @@ def num_to_bits(num):
     bit_str = ''.join(bits)
     return f"{bit_str[:4]} {bit_str[4:]}"
 
+# ========== 物理常量（现在函数已定义，可以安全调用）==========
+G = 0.03
+F = float32_to_float64(0.99)
+ONE_TNT_MOTION_XZ = 0.6026793588895138
+ONE_TNT_MOTION_Y = 0.004435058914919521
+DIRECTIONS_MAPPING = {'N': '00', 'W': '01', 'E': '10', 'S': '11'}
+
 def main():
     parser = argparse.ArgumentParser(description='珍珠炮炮码计算器')
     parser.add_argument('--dest-x', type=float, required=True, help='目标 X 坐标')
@@ -41,13 +42,12 @@ def main():
     dest_z = args.dest_z
     base_tick = args.base_tick
     ground_height = args.ground_height
-    pos0 = args.base_pos          # [x, y, z]
-    motion0 = args.base_motion    # [vx, vy, vz]
+    pos0 = args.base_pos
+    motion0 = args.base_motion
 
     dx = dest_x - pos0[0]
     dz = dest_z - pos0[2]
 
-    # 主方向
     if abs(dx) > abs(dz):
         direction = 'E' if dx > 0 else 'W'
     else:
@@ -59,7 +59,6 @@ def main():
     while True:
         kp = 2 * ONE_TNT_MOTION_XZ * ((F - F ** (fly_tick + 1)) / (1 - F))
 
-        # 计算 m, n
         if direction in ('N', 'S'):
             m = round((dx + dz) / kp)
             n = round((dz - dx) / kp)
@@ -68,7 +67,7 @@ def main():
             motion_x = (abs(m) - abs(n)) * ONE_TNT_MOTION_XZ + motion0[0]
             motion_y = abs(m + n) * ONE_TNT_MOTION_Y + motion0[1]
             motion_z = (m + n) * ONE_TNT_MOTION_XZ + motion0[2]
-        else:  # E/W
+        else:
             m = round((dx + dz) / kp)
             n = round((dx - dz) / kp)
             if direction == 'W':
@@ -81,7 +80,6 @@ def main():
             fly_tick += 1
             continue
 
-        # 模拟飞行
         px, py, pz = pos0
         vx, vy, vz = motion_x, motion_y, motion_z
         for _ in range(fly_tick):
